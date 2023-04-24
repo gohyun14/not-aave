@@ -5,6 +5,30 @@ __metadata:
   version: 6
   cacheKey: 8
 
+"@aave/contract-helpers@npm:^1.16.0":
+  version: 1.16.0
+  resolution: "@aave/contract-helpers@npm:1.16.0"
+  dependencies:
+    isomorphic-unfetch: ^3.1.0
+  peerDependencies:
+    bignumber.js: ^9.x
+    ethers: ^5.x
+    reflect-metadata: ^0.1.x
+    tslib: ^2.4.x
+  checksum: f8e5004e588b32d9e7c6e1597bd4e593078ea4bca7719f9f1ccbca272049fa6705685be78cec06384167f3362c3b16c64943fcccacc81329e6057989dbfc54e1
+  languageName: node
+  linkType: hard
+
+"@aave/math-utils@npm:^1.16.0":
+  version: 1.16.0
+  resolution: "@aave/math-utils@npm:1.16.0"
+  peerDependencies:
+    bignumber.js: ^9.x
+    tslib: ^2.4.x
+  checksum: 7d71b9eddebc91fed73964a4e45179a885819680dcfa398993bc062ed2684110b7b7cf8c3250cb9c904734508781d1d9ad4a0176435955ff4e56d2c7f5d43d2a
+  languageName: node
+  linkType: hard
+
 "@babel/compat-data@npm:^7.17.7, @babel/compat-data@npm:^7.21.4":
   version: 7.21.4
   resolution: "@babel/compat-data@npm:7.21.4"
@@ -4802,6 +4826,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"isomorphic-unfetch@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "isomorphic-unfetch@npm:3.1.0"
+  dependencies:
+    node-fetch: ^2.6.1
+    unfetch: ^4.2.0
+  checksum: 82b92fe4ec2823a81ab0fc0d11bd94d710e6f9a940d56b3cba31896d4345ec9ffc7949f4ff31ebcae84f6b95f7ebf3474c4c7452b834eb4078ea3f2c37e459c5
+  languageName: node
+  linkType: hard
+
 "isomorphic-ws@npm:^4.0.1":
   version: 4.0.1
   resolution: "isomorphic-ws@npm:4.0.1"
@@ -5526,7 +5560,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.7":
+"node-fetch@npm:^2.6.1, node-fetch@npm:^2.6.7":
   version: 2.6.9
   resolution: "node-fetch@npm:2.6.9"
   dependencies:
@@ -5607,6 +5641,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "not-aave@workspace:."
   dependencies:
+    "@aave/contract-helpers": ^1.16.0
+    "@aave/math-utils": ^1.16.0
     "@headlessui/react": latest
     "@heroicons/react": ^2.0.17
     "@tanstack/react-query": ^4.29.3
@@ -7229,6 +7265,13 @@ __metadata:
     has-symbols: ^1.0.3
     which-boxed-primitive: ^1.0.2
   checksum: b7a1cf5862b5e4b5deb091672ffa579aa274f648410009c81cca63fed3b62b610c4f3b773f912ce545bb4e31edc3138975b5bc777fc6e4817dca51affb6380e9
+  languageName: node
+  linkType: hard
+
+"unfetch@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "unfetch@npm:4.2.0"
+  checksum: 6a4b2557e1d921eaa80c4425ce27a404945ec26491ed06e62598f333996a91a44c7908cb26dc7c2746d735762b13276cf4aa41829b4c8f438dde63add3045d7a
   languageName: node
   linkType: hard
 

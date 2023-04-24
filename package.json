@@ -9,6 +9,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@aave/contract-helpers": "^1.16.0",
+    "@aave/math-utils": "^1.16.0",
     "@headlessui/react": "latest",
     "@heroicons/react": "^2.0.17",
     "@tanstack/react-query": "^4.29.3",

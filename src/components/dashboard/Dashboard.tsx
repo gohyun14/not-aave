@@ -3,6 +3,7 @@ import { poolAbi } from "../../contract-info/abis";
 import { useAccount, useContractRead, useProvider } from "wagmi";
 import { type Provider } from "@wagmi/core";
 import { formatUnits } from "ethers/lib/utils";
+import { BigNumber } from "ethers";
 
 const Dashboard = () => {
   const { address } = useAccount();
@@ -10,6 +11,9 @@ const Dashboard = () => {
   return (
     <div>
       <DashboardHeader provider={provider} address={address} />
+      <div>
+        <YourSupplies />
+      </div>
     </div>
   );
 };
@@ -20,8 +24,12 @@ type DashboardHeaderProps = {
 };
 
 const DashboardHeader = ({ provider, address }: DashboardHeaderProps) => {
-  const { data, isError, isLoading } = useContractRead({
-    address: "0x7b5C526B7F8dfdff278b4a3e045083FBA4028790",
+  const {
+    data: contractUserAccountData,
+    isError,
+    isLoading,
+  } = useContractRead({
+    address: process.env.NEXT_PUBLIC_GOERLI_AAVE_POOL_CONTRACT as `0x${string}`,
     abi: poolAbi,
     functionName: "getUserAccountData",
     args: [address as `0x${string}`],
@@ -29,37 +37,48 @@ const DashboardHeader = ({ provider, address }: DashboardHeaderProps) => {
     // watch: true,
   });
 
-  //   console.log(data);
-
   const userAccountData = [
     {
       name: "totalCollateralBase",
       value:
-        data?.totalCollateralBase && formatUnits(data?.totalCollateralBase, 8),
+        contractUserAccountData?.totalCollateralBase &&
+        formatUnits(contractUserAccountData?.totalCollateralBase, 8),
+      // value:
+      //   contractUserAccountData?.totalCollateralBase &&
+      //   formatUnits(
+      //     contractUserAccountData?.totalCollateralBase,
+      //     BigNumber.from("1000000000000000000000000000")
+      //   ),
     },
     {
       name: "totalDebtBase",
-      value: data?.totalDebtBase && formatUnits(data?.totalDebtBase, 8),
+      value:
+        contractUserAccountData?.totalDebtBase &&
+        formatUnits(contractUserAccountData?.totalDebtBase, 8),
     },
     {
       name: "availableBorrowsBase",
       value:
-        data?.availableBorrowsBase &&
-        formatUnits(data?.availableBorrowsBase, 8),
+        contractUserAccountData?.availableBorrowsBase &&
+        formatUnits(contractUserAccountData?.availableBorrowsBase, 8),
     },
     {
       name: "currentLiquidationThreshold",
       value:
-        data?.currentLiquidationThreshold &&
-        formatUnits(data?.currentLiquidationThreshold, 2),
+        contractUserAccountData?.currentLiquidationThreshold &&
+        formatUnits(contractUserAccountData?.currentLiquidationThreshold, 2),
     },
     {
       name: "ltv",
-      value: data?.ltv && formatUnits(data?.ltv, 3),
+      value:
+        contractUserAccountData?.ltv &&
+        formatUnits(contractUserAccountData?.ltv, 3),
     },
     {
       name: "healthFactor",
-      value: data?.healthFactor && formatUnits(data?.healthFactor, 18),
+      value:
+        contractUserAccountData?.healthFactor &&
+        formatUnits(contractUserAccountData?.healthFactor, 18),
     },
   ];
 
@@ -80,6 +99,48 @@ const DashboardHeader = ({ provider, address }: DashboardHeaderProps) => {
             </div>
           ))
         )}
+      </div>
+    </div>
+  );
+};
+
+const YourSupplies = () => {
+  const { data, isError, isLoading } = useContractRead({
+    address: process.env.NEXT_PUBLIC_GOERLI_AAVE_POOL_CONTRACT as `0x${string}`,
+    abi: poolAbi,
+    functionName: "getReserveData",
+    args: [process.env.NEXT_PUBLIC_GOERLI_USDC_CONTRACT as `0x${string}`],
+    // watch: true,
+  });
+
+  console.log(data);
+
+  return (
+    <div>
+      <h3>Your Supplies</h3>
+      <div>
+        <p>
+          currentLiquidityRate:{" "}
+          {data?.currentLiquidityRate.div(BigNumber.from(6)).toString()}
+        </p>
+        <p>
+          currentStableBorrowRate:{" "}
+          {data?.currentStableBorrowRate
+            // .div("1000000000000000000000000000")
+            .div(BigNumber.from(18))
+            .toString()}
+        </p>
+        <p>
+          {data?.currentStableBorrowRate &&
+            formatUnits(data?.currentStableBorrowRate, BigNumber.from(27))}
+        </p>
+        <p>
+          currentVariableBorrowRate:{" "}
+          {data?.currentVariableBorrowRate
+            // .div("1000000000000000000000000000")
+            .div(BigNumber.from(18))
+            .toString()}
+        </p>
       </div>
     </div>
   );

@@ -140,6 +140,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bgd-labs/aave-address-book@npm:^1.23.0":
+  version: 1.23.0
+  resolution: "@bgd-labs/aave-address-book@npm:1.23.0"
+  checksum: ccdeb48ab9817bb875051f0b5f0e4afc33497352110a15a7a91780f13bf8043e5a3430ab70e6054413e4af2d63184c1ff2af38f170c1b4bb6766f09a4fdebada
+  languageName: node
+  linkType: hard
+
 "@coinbase/wallet-sdk@npm:^3.5.4":
   version: 3.7.0
   resolution: "@coinbase/wallet-sdk@npm:3.7.0"
@@ -2596,6 +2603,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bignumber.js@npm:^9.1.1":
+  version: 9.1.1
+  resolution: "bignumber.js@npm:9.1.1"
+  checksum: ad243b7e2f9120b112d670bb3d674128f0bd2ca1745b0a6c9df0433bd2c0252c43e6315d944c2ac07b4c639e7496b425e46842773cf89c6a2dcd4f31e5c4b11e
+  languageName: node
+  linkType: hard
+
 "binary-extensions@npm:^2.0.0":
   version: 2.2.0
   resolution: "binary-extensions@npm:2.2.0"
@@ -3028,6 +3042,13 @@ __metadata:
   version: 1.0.8
   resolution: "damerau-levenshtein@npm:1.0.8"
   checksum: d240b7757544460ae0586a341a53110ab0a61126570ef2d8c731e3eab3f0cb6e488e2609e6a69b46727635de49be20b071688698744417ff1b6c1d7ccd03e0de
+  languageName: node
+  linkType: hard
+
+"dayjs@npm:^1.11.7":
+  version: 1.11.7
+  resolution: "dayjs@npm:1.11.7"
+  checksum: 5003a7c1dd9ed51385beb658231c3548700b82d3548c0cfbe549d85f2d08e90e972510282b7506941452c58d32136d6362f009c77ca55381a09c704e9f177ebb
   languageName: node
   linkType: hard
 
@@ -5643,6 +5664,7 @@ __metadata:
   dependencies:
     "@aave/contract-helpers": ^1.16.0
     "@aave/math-utils": ^1.16.0
+    "@bgd-labs/aave-address-book": ^1.23.0
     "@headlessui/react": latest
     "@heroicons/react": ^2.0.17
     "@tanstack/react-query": ^4.29.3
@@ -5654,6 +5676,8 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.56.0
     "@typescript-eslint/parser": ^5.56.0
     autoprefixer: ^10.4.14
+    bignumber.js: ^9.1.1
+    dayjs: ^1.11.7
     eslint: ^8.36.0
     eslint-config-next: ^13.2.4
     ethers: ^5
@@ -5665,6 +5689,7 @@ __metadata:
     prettier-plugin-tailwindcss: ^0.2.6
     react: 18.2.0
     react-dom: 18.2.0
+    reflect-metadata: ^0.1.13
     tailwindcss: ^3.3.0
     typescript: ^5.0.2
     wagmi: ^0.12.10
@@ -6365,6 +6390,13 @@ __metadata:
   version: 0.1.0
   resolution: "real-require@npm:0.1.0"
   checksum: 96745583ed4f82cd5c6a6af012fd1d3c6fc2f13ae1bcff1a3c4f8094696013a1a07c82c5aa66a403d7d4f84949fc2203bc927c7ad120caad125941ca2d7e5e8e
+  languageName: node
+  linkType: hard
+
+"reflect-metadata@npm:^0.1.13":
+  version: 0.1.13
+  resolution: "reflect-metadata@npm:0.1.13"
+  checksum: 798d379a7b6f6455501145419505c97dd11cbc23857a386add2b9ef15963ccf15a48d9d15507afe01d4cd74116df8a213247200bac00320bd7c11ddeaa5e8fb4
   languageName: node
   linkType: hard
 

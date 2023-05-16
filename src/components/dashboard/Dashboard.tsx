@@ -135,12 +135,12 @@ const Dashboard = () => {
   const userSupplies = userSummary?.userReservesData.filter(
     (reserve) => reserve.scaledATokenBalance !== "0"
   );
-  // console.log("userReservesFiltered", userSupplies);
+  console.log("userSuppliesFiltered", userSupplies);
 
   const userBorrows = userSummary?.userReservesData.filter(
     (reserve) => reserve.scaledVariableDebt !== "0"
   );
-  console.log("userReservesFiltered", userBorrows);
+  // console.log("userReservesFiltered", userBorrows);
 
   return (
     <div>

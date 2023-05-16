@@ -9,7 +9,8 @@ import {
   usePrepareContractWrite,
   useAccount,
   useSendTransaction,
-  useWaitForTransaction,
+  useContractRead,
+  erc20ABI,
 } from "wagmi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
@@ -19,6 +20,7 @@ import {
   ArrowRightIcon,
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/20/solid";
+import useReadBalance from "@/hooks/useReadBalance";
 
 import Modal from "./Modal";
 
@@ -62,14 +64,23 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
     valueAsNumber: true,
   });
 
+  const { data: userBalanceData, isLoading: isUserBalanceLoading } =
+    useReadBalance(
+      asset.underlyingAsset as `0x${string}`,
+      asset.reserve.decimals,
+      address as `0x${string}`
+    );
+  console.log(userBalanceData, isUserBalanceLoading);
+
   const { config } = usePrepareContractWrite({
     address: process.env.NEXT_PUBLIC_GOERLI_AAVE_POOL_CONTRACT as `0x${string}`,
     abi: poolAbi,
-    functionName: "withdraw",
+    functionName: "supply",
     args: [
       asset.underlyingAsset as `0x${string}`,
       utils.parseUnits(amount.toString(), asset.reserve.decimals),
       address as `0x${string}`,
+      0,
     ],
     enabled:
       !!address &&
@@ -102,7 +113,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
         method="POST"
         className="text-zinc-900"
       >
-        <h1>Withdraw {asset.reserve.name}</h1>
+        <h1>Supply {asset.reserve.name}</h1>
         <div className="flex flex-col">
           <label
             htmlFor="last-name"
@@ -120,7 +131,8 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
                 setAmount(parseFloat(e.target.value));
               }
               if (
-                parseFloat(e.target.value) > parseFloat(asset.underlyingBalance)
+                userBalanceData &&
+                parseFloat(e.target.value) > parseFloat(userBalanceData)
               ) {
                 setErrorMessage("This amount exceeds your balance.");
               }
@@ -131,8 +143,26 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
             className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm sm:text-sm"
           />
           <AnimatePresence>
+            {!(errors.amount || errorMessage !== "") && (
+              <motion.p
+                initial={{ height: 0, opacity: 0 }}
+                animate={{
+                  opacity: 1,
+                  height: "auto",
+                  transition: { duration: 0.1 },
+                }}
+                exit={{
+                  height: 0,
+                  opacity: 0,
+                  transition: { duration: 0.1 },
+                }}
+                className="mt-[2px] text-xs text-zinc-600"
+              >
+                Balance: {isUserBalanceLoading ? "..." : userBalanceData}
+              </motion.p>
+            )}
             {(errors.amount || errorMessage !== "") && (
-              <motion.div
+              <motion.p
                 initial={{ height: 0, opacity: 0 }}
                 animate={{
                   opacity: 1,
@@ -147,7 +177,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
                 className="mt-[2px] text-xs text-red-600"
               >
                 {errors.amount ? errors?.amount?.message : errorMessage}
-              </motion.div>
+              </motion.p>
             )}
           </AnimatePresence>
         </div>

@@ -130,9 +130,28 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
             ref={ref}
             className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm sm:text-sm"
           />
+
           <AnimatePresence>
+            {!(errors.amount || errorMessage !== "") && (
+              <motion.p
+                initial={{ height: 0, opacity: 0 }}
+                animate={{
+                  opacity: 1,
+                  height: "auto",
+                  transition: { duration: 0.1 },
+                }}
+                exit={{
+                  height: 0,
+                  opacity: 0,
+                  transition: { duration: 0.1 },
+                }}
+                className="mt-[2px] text-xs text-zinc-600"
+              >
+                Balance: {asset.underlyingBalance}
+              </motion.p>
+            )}
             {(errors.amount || errorMessage !== "") && (
-              <motion.div
+              <motion.p
                 initial={{ height: 0, opacity: 0 }}
                 animate={{
                   opacity: 1,
@@ -147,7 +166,7 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
                 className="mt-[2px] text-xs text-red-600"
               >
                 {errors.amount ? errors?.amount?.message : errorMessage}
-              </motion.div>
+              </motion.p>
             )}
           </AnimatePresence>
         </div>

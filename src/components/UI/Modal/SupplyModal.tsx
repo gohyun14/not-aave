@@ -34,12 +34,12 @@ export type FormSchemaType = {
   amount: number | undefined;
 };
 
-type WithdrawModalProps = {
+type SupplyModalProps = {
   closeModal: () => void;
   asset: ComputedUserReserve<FormatReserveUSDResponse>;
 };
 
-const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
+const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
   const { address } = useAccount();
 
   const [amount, setAmount] = useState<number>(0);
@@ -231,4 +231,4 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
   );
 };
 
-export default WithdrawModal;
+export default SupplyModal;

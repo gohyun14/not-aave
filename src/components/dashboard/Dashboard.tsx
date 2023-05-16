@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { poolAbi } from "../../contract-info/abis";
 import { useAccount, useContractRead, useProvider } from "wagmi";
 import {
@@ -19,6 +19,7 @@ import * as markets from "@bgd-labs/aave-address-book";
 import dayjs from "dayjs";
 
 import WithdrawModal from "../UI/Modal/WithdrawModal";
+import SupplyModal from "../UI/Modal/SupplyModal";
 
 const Dashboard = () => {
   const { address } = useAccount();
@@ -238,6 +239,7 @@ type SupplyItemProps = {
 
 const SupplyItem = ({ asset }: SupplyItemProps) => {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [isSupplyModalOpen, setIsSupplyModalOpen] = useState(false);
 
   return (
     <>
@@ -250,11 +252,18 @@ const SupplyItem = ({ asset }: SupplyItemProps) => {
         </div>
         <div>
           <button onClick={() => setIsWithdrawModalOpen(true)}>Withdraw</button>
+          <button onClick={() => setIsSupplyModalOpen(true)}>Supply</button>
         </div>
       </div>
       {isWithdrawModalOpen && (
         <WithdrawModal
           closeModal={() => setIsWithdrawModalOpen(false)}
+          asset={asset}
+        />
+      )}
+      {isSupplyModalOpen && (
+        <SupplyModal
+          closeModal={() => setIsSupplyModalOpen(false)}
           asset={asset}
         />
       )}

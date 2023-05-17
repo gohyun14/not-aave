@@ -8,7 +8,7 @@ import {
 import {
   usePrepareContractWrite,
   useAccount,
-  useSendTransaction,
+  useContractWrite,
   useContractRead,
   erc20ABI,
 } from "wagmi";
@@ -21,6 +21,7 @@ import {
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/20/solid";
 import useReadBalance from "@/hooks/useReadBalance";
+import useApproval from "@/hooks/useApproval";
 
 import Modal from "./Modal";
 
@@ -45,12 +46,13 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
   const { address } = useAccount();
 
   const [amount, setAmount] = useState<number>(0);
-  const [errorMessage, setErrorMessage] = useState(""); //TODO: amount validation
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<FormSchemaType>({
     //eslint-disable-next-line
     resolver: zodResolver(FormSchema),
@@ -64,15 +66,25 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
     valueAsNumber: true,
   });
 
+  // get user balance
   const { data: userBalanceData, isLoading: isUserBalanceLoading } =
     useReadBalance(
       asset.underlyingAsset as `0x${string}`,
       asset.reserve.decimals,
       address as `0x${string}`
     );
-  console.log(userBalanceData, isUserBalanceLoading);
 
-  const { config } = usePrepareContractWrite({
+  // allowance amount and transaction
+  const { isAllowed, isAllowanceTransactionSending, sendAllowanceTransaction } =
+    useApproval(
+      asset.underlyingAsset as `0x${string}`,
+      address as `0x${string}`,
+      asset.reserve.decimals,
+      amount
+    );
+
+  // supply transaction logic
+  const { config: supplyConfig } = usePrepareContractWrite({
     address: process.env.NEXT_PUBLIC_GOERLI_AAVE_POOL_CONTRACT as `0x${string}`,
     abi: poolAbi,
     functionName: "supply",
@@ -86,16 +98,23 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
       !!address &&
       errorMessage === "" &&
       errors.amount === undefined &&
-      amount > 0,
+      amount > 0 &&
+      isAllowed,
   });
 
   const {
     data: sendTransactionData,
     isLoading: isTransactionSending,
-    sendTransaction,
+    write: sendTransaction,
     error: sendTransactionError,
     isSuccess: isSendTransactionSuccess,
-  } = useSendTransaction(config);
+  } = useContractWrite({
+    ...supplyConfig,
+    onSuccess: () => {
+      reset();
+      setAmount(0);
+    },
+  });
 
   const onSubmit = (data: FormSchemaType) => {
     if (data.amount && errorMessage === "") {
@@ -132,7 +151,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
               }
               if (
                 userBalanceData &&
-                parseFloat(e.target.value) > parseFloat(userBalanceData)
+                parseFloat(e.target.value) > userBalanceData
               ) {
                 setErrorMessage("This amount exceeds your balance.");
               }
@@ -158,7 +177,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
                 }}
                 className="mt-[2px] text-xs text-zinc-600"
               >
-                Balance: {isUserBalanceLoading ? "..." : userBalanceData}
+                Wallet Balance: {isUserBalanceLoading ? "..." : userBalanceData}
               </motion.p>
             )}
             {(errors.amount || errorMessage !== "") && (
@@ -181,8 +200,33 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
             )}
           </AnimatePresence>
         </div>
+        {!isAllowed && (
+          <motion.button
+            disabled={errors.amount !== undefined || errorMessage !== ""}
+            type="button"
+            className="mt-1 flex flex-row items-center justify-center rounded-full bg-fuchsia-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:bg-zinc-400"
+            onClick={() => sendAllowanceTransaction?.()}
+            whileTap={{
+              scale: 0.95,
+              borderRadius: "8px",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 150,
+              damping: 8,
+              mass: 0.5,
+            }}
+          >
+            {isAllowanceTransactionSending ? "Approving" : "Approve"}
+            {isAllowanceTransactionSending && (
+              <svg className="ml-1 h-4 w-4 animate-spin rounded-full border-2 border-t-fuchsia-800 text-fuchsia-200" />
+            )}
+          </motion.button>
+        )}
         <motion.button
-          disabled={errors.amount !== undefined || errorMessage !== ""}
+          disabled={
+            errors.amount !== undefined || errorMessage !== "" || !isAllowed
+          }
           type="submit"
           className="mt-1 flex flex-row items-center justify-center rounded-full bg-fuchsia-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:bg-zinc-400"
           whileTap={{
@@ -196,7 +240,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
             mass: 0.5,
           }}
         >
-          {isTransactionSending ? "Withdrawing" : "Withdraw"}
+          {isTransactionSending ? "Supplying" : "Supply"}
           {isTransactionSending && (
             <svg className="ml-1 h-4 w-4 animate-spin rounded-full border-2 border-t-fuchsia-800 text-fuchsia-200" />
           )}

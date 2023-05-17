@@ -1,12 +1,5 @@
-import { useEffect, useState } from "react";
-import {
-  usePrepareContractWrite,
-  useAccount,
-  useSendTransaction,
-  useContractRead,
-  erc20ABI,
-} from "wagmi";
-import { BigNumber, utils } from "ethers";
+import { utils } from "ethers";
+import { erc20ABI, useContractRead } from "wagmi";
 
 const useReadBalance = (
   assetAddress: `0x${string}`,
@@ -22,7 +15,9 @@ const useReadBalance = (
   });
 
   return {
-    data: userBalance && utils.formatUnits(userBalance, decimals),
+    data:
+      userBalance &&
+      Number(parseFloat(utils.formatUnits(userBalance, decimals)).toFixed(2)),
     isLoading,
   };
 };

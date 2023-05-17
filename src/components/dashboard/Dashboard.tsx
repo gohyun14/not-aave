@@ -20,6 +20,8 @@ import dayjs from "dayjs";
 
 import WithdrawModal from "../UI/Modal/WithdrawModal";
 import SupplyModal from "../UI/Modal/SupplyModal";
+import RepayModal from "../UI/Modal/RepayModal";
+import BorrowModal from "../UI/Modal/BorrowModal";
 
 const Dashboard = () => {
   const { address } = useAccount();
@@ -127,15 +129,15 @@ const Dashboard = () => {
       });
   }, [address, provider]);
 
-  // console.log("poolReserves", poolReserves);
-  // console.log("userSummary", userSummary);
+  console.log("poolReserves", poolReserves);
+  console.log("userSummary", userSummary);
 
   // const netAPY = useMemo(() => {}, []);
 
   const userSupplies = userSummary?.userReservesData.filter(
     (reserve) => reserve.scaledATokenBalance !== "0"
   );
-  console.log("userSuppliesFiltered", userSupplies);
+  // console.log("userSuppliesFiltered", userSupplies);
 
   const userBorrows = userSummary?.userReservesData.filter(
     (reserve) => reserve.scaledVariableDebt !== "0"
@@ -202,7 +204,7 @@ const DashboardHeader = ({
             <p>Net Worth: {netWorth}</p>
             <p>Health Factor: {healthFactor}</p>
             {/* TODO: add APY */}
-            <p>Next APY: _TODO_</p>
+            <p>Net APY: _TODO_</p>
           </div>
         )}
       </div>
@@ -285,15 +287,50 @@ const YourBorrows = ({ borrows, balance }: YourBorrowsProps) => {
         <ul>
           {borrows?.map((asset) => (
             <li key={asset.underlyingAsset} className="flex flex-row gap-x-4">
-              <p>reserve: {asset.reserve.name}</p>
-              <p>balance: {asset.totalBorrows}</p>
-              <p>balanceUSD: {asset.totalBorrowsUSD}</p>
-              <p>borrow apy: {asset.reserve.variableBorrowAPY}</p>
+              <BorrowItem asset={asset} />
             </li>
           ))}
         </ul>
       </div>
     </div>
+  );
+};
+
+type BorrowItemProps = {
+  asset: ComputedUserReserve<FormatReserveUSDResponse>;
+};
+
+const BorrowItem = ({ asset }: BorrowItemProps) => {
+  const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
+  const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
+
+  return (
+    <>
+      <div>
+        <div className="flex flex-row gap-x-4">
+          <p>reserve: {asset.reserve.name}</p>
+          <p>balance: {asset.totalBorrows}</p>
+          <p>balanceUSD: {asset.totalBorrowsUSD}</p>
+          <p>borrow apy: {asset.reserve.variableBorrowAPY}</p>
+        </div>
+        <div>
+          <button onClick={() => setIsRepayModalOpen(true)}>Repay</button>
+          <button onClick={() => setIsBorrowModalOpen(true)}>Borrow</button>
+        </div>
+      </div>
+      {isRepayModalOpen && (
+        <RepayModal
+          closeModal={() => setIsRepayModalOpen(false)}
+          asset={asset}
+        />
+      )}
+      {isBorrowModalOpen && (
+        <BorrowModal
+          closeModal={() => setIsBorrowModalOpen(false)}
+          asset={asset}
+        />
+      )}
+    </>
   );
 };
 

@@ -8,8 +8,9 @@ import {
 import {
   usePrepareContractWrite,
   useAccount,
-  useSendTransaction,
-  useWaitForTransaction,
+  useContractWrite,
+  useContractRead,
+  erc20ABI,
 } from "wagmi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
@@ -19,6 +20,8 @@ import {
   ArrowRightIcon,
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/20/solid";
+import useReadBalance from "@/hooks/useReadBalance";
+import useApproval from "@/hooks/useApproval";
 
 import Modal from "./Modal";
 
@@ -34,12 +37,12 @@ export type FormSchemaType = {
   amount: number | undefined;
 };
 
-type WithdrawModalProps = {
+type RepayModalProps = {
   closeModal: () => void;
   asset: ComputedUserReserve<FormatReserveUSDResponse>;
 };
 
-const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
+const RepayModal = ({ closeModal, asset }: RepayModalProps) => {
   const { address } = useAccount();
 
   const [amount, setAmount] = useState<number>(0);
@@ -63,30 +66,50 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
     valueAsNumber: true,
   });
 
-  const { config } = usePrepareContractWrite({
+  // get user balance
+  const { data: userBalanceData, isLoading: isUserBalanceLoading } =
+    useReadBalance(
+      asset.underlyingAsset as `0x${string}`,
+      asset.reserve.decimals,
+      address as `0x${string}`
+    );
+
+  // allowance amount and transaction
+  const { isAllowed, isAllowanceTransactionSending, sendAllowanceTransaction } =
+    useApproval(
+      asset.underlyingAsset as `0x${string}`,
+      address as `0x${string}`,
+      asset.reserve.decimals,
+      amount
+    );
+
+  // supply transaction logic
+  const { config: repayConfig } = usePrepareContractWrite({
     address: process.env.NEXT_PUBLIC_GOERLI_AAVE_POOL_CONTRACT as `0x${string}`,
     abi: poolAbi,
-    functionName: "withdraw",
+    functionName: "repay",
     args: [
       asset.underlyingAsset as `0x${string}`,
       utils.parseUnits(amount.toString(), asset.reserve.decimals),
+      BigNumber.from(2),
       address as `0x${string}`,
     ],
     enabled:
       !!address &&
       errorMessage === "" &&
       errors.amount === undefined &&
-      amount > 0,
+      amount > 0 &&
+      isAllowed,
   });
 
   const {
     data: sendTransactionData,
     isLoading: isTransactionSending,
-    sendTransaction,
+    write: sendTransaction,
     error: sendTransactionError,
     isSuccess: isSendTransactionSuccess,
-  } = useSendTransaction({
-    ...config,
+  } = useContractWrite({
+    ...repayConfig,
     onSuccess: () => {
       reset();
       setAmount(0);
@@ -109,7 +132,7 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
         method="POST"
         className="text-zinc-900"
       >
-        <h1>Withdraw {asset.reserve.name}</h1>
+        <h1>Repay {asset.reserve.name}</h1>
         <div className="flex flex-col">
           <label
             htmlFor="last-name"
@@ -127,7 +150,8 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
                 setAmount(parseFloat(e.target.value));
               }
               if (
-                parseFloat(e.target.value) > parseFloat(asset.underlyingBalance)
+                userBalanceData &&
+                parseFloat(e.target.value) > userBalanceData
               ) {
                 setErrorMessage("This amount exceeds your balance.");
               }
@@ -137,10 +161,9 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
             ref={ref}
             className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm sm:text-sm"
           />
-
           <AnimatePresence>
             {!(errors.amount || errorMessage !== "") && (
-              <motion.p
+              <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{
                   opacity: 1,
@@ -154,8 +177,12 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
                 }}
                 className="mt-[2px] text-xs text-zinc-600"
               >
-                Supplied Balance: {asset.underlyingBalance}
-              </motion.p>
+                <p>Borrowed Balance: {asset.variableBorrows}</p>
+                <p>
+                  Wallet Balance:{" "}
+                  {isUserBalanceLoading ? "..." : userBalanceData}
+                </p>
+              </motion.div>
             )}
             {(errors.amount || errorMessage !== "") && (
               <motion.p
@@ -177,8 +204,33 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
             )}
           </AnimatePresence>
         </div>
+        {!isAllowed && (
+          <motion.button
+            disabled={errors.amount !== undefined || errorMessage !== ""}
+            type="button"
+            className="mt-1 flex flex-row items-center justify-center rounded-full bg-fuchsia-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:bg-zinc-400"
+            onClick={() => sendAllowanceTransaction?.()}
+            whileTap={{
+              scale: 0.95,
+              borderRadius: "8px",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 150,
+              damping: 8,
+              mass: 0.5,
+            }}
+          >
+            {isAllowanceTransactionSending ? "Approving" : "Approve"}
+            {isAllowanceTransactionSending && (
+              <svg className="ml-1 h-4 w-4 animate-spin rounded-full border-2 border-t-fuchsia-800 text-fuchsia-200" />
+            )}
+          </motion.button>
+        )}
         <motion.button
-          disabled={errors.amount !== undefined || errorMessage !== ""}
+          disabled={
+            errors.amount !== undefined || errorMessage !== "" || !isAllowed
+          }
           type="submit"
           className="mt-1 flex flex-row items-center justify-center rounded-full bg-fuchsia-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:bg-zinc-400"
           whileTap={{
@@ -192,7 +244,7 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
             mass: 0.5,
           }}
         >
-          {isTransactionSending ? "Withdrawing" : "Withdraw"}
+          {isTransactionSending ? "Repaying" : "Repay"}
           {isTransactionSending && (
             <svg className="ml-1 h-4 w-4 animate-spin rounded-full border-2 border-t-fuchsia-800 text-fuchsia-200" />
           )}
@@ -257,4 +309,4 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
   );
 };
 
-export default WithdrawModal;
+export default RepayModal;

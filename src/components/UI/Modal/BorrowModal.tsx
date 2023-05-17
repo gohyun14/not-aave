@@ -34,12 +34,12 @@ export type FormSchemaType = {
   amount: number | undefined;
 };
 
-type WithdrawModalProps = {
+type BorrowModalProps = {
   closeModal: () => void;
   asset: ComputedUserReserve<FormatReserveUSDResponse>;
 };
 
-const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
+const BorrowModal = ({ closeModal, asset }: BorrowModalProps) => {
   const { address } = useAccount();
 
   const [amount, setAmount] = useState<number>(0);
@@ -66,10 +66,12 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
   const { config } = usePrepareContractWrite({
     address: process.env.NEXT_PUBLIC_GOERLI_AAVE_POOL_CONTRACT as `0x${string}`,
     abi: poolAbi,
-    functionName: "withdraw",
+    functionName: "borrow",
     args: [
       asset.underlyingAsset as `0x${string}`,
       utils.parseUnits(amount.toString(), asset.reserve.decimals),
+      BigNumber.from(2),
+      0,
       address as `0x${string}`,
     ],
     enabled:
@@ -126,11 +128,11 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
               if (parseFloat(e.target.value)) {
                 setAmount(parseFloat(e.target.value));
               }
-              if (
-                parseFloat(e.target.value) > parseFloat(asset.underlyingBalance)
-              ) {
-                setErrorMessage("This amount exceeds your balance.");
-              }
+              // if (
+              //   parseFloat(e.target.value) > parseFloat(asset.underlyingBalance)
+              // ) {
+              //   setErrorMessage("This amount exceeds your balance.");
+              // }
             }}
             onBlur={void onBlur}
             name={name}
@@ -139,24 +141,6 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
           />
 
           <AnimatePresence>
-            {!(errors.amount || errorMessage !== "") && (
-              <motion.p
-                initial={{ height: 0, opacity: 0 }}
-                animate={{
-                  opacity: 1,
-                  height: "auto",
-                  transition: { duration: 0.1 },
-                }}
-                exit={{
-                  height: 0,
-                  opacity: 0,
-                  transition: { duration: 0.1 },
-                }}
-                className="mt-[2px] text-xs text-zinc-600"
-              >
-                Supplied Balance: {asset.underlyingBalance}
-              </motion.p>
-            )}
             {(errors.amount || errorMessage !== "") && (
               <motion.p
                 initial={{ height: 0, opacity: 0 }}
@@ -192,7 +176,7 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
             mass: 0.5,
           }}
         >
-          {isTransactionSending ? "Withdrawing" : "Withdraw"}
+          {isTransactionSending ? "Borrowing" : "Borrow"}
           {isTransactionSending && (
             <svg className="ml-1 h-4 w-4 animate-spin rounded-full border-2 border-t-fuchsia-800 text-fuchsia-200" />
           )}
@@ -257,4 +241,4 @@ const WithdrawModal = ({ closeModal, asset }: WithdrawModalProps) => {
   );
 };
 
-export default WithdrawModal;
+export default BorrowModal;

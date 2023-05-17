@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useAccount, useConnect } from "wagmi";
 
 const ConnectWalletButton = () => {

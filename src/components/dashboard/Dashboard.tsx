@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { poolAbi } from "../../contract-info/abis";
-import { useAccount, useContractRead, useProvider } from "wagmi";
+import { useAccount, useContractRead, useProvider, erc20ABI } from "wagmi";
+import { readContract } from "@wagmi/core";
 import {
   UiPoolDataProvider,
   UiIncentiveDataProvider,
@@ -129,8 +130,8 @@ const Dashboard = () => {
       });
   }, [address, provider]);
 
-  console.log("poolReserves", poolReserves);
-  console.log("userSummary", userSummary);
+  // console.log("poolReserves", poolReserves);
+  // console.log("userSummary", userSummary);
 
   // const netAPY = useMemo(() => {}, []);
 
@@ -143,6 +144,31 @@ const Dashboard = () => {
     (reserve) => reserve.scaledVariableDebt !== "0"
   );
   // console.log("userReservesFiltered", userBorrows);
+
+  const possibleSupplies = useMemo(() => {
+    const balances: (FormatReserveUSDResponse &
+      ReserveDataHumanized &
+      Partial<CalculateReserveIncentivesResponse>)[] = [];
+
+    poolReserves?.forEach((reserve) => {
+      readContract({
+        address: reserve.underlyingAsset as `0x${string}`,
+        abi: erc20ABI,
+        functionName: "balanceOf",
+        args: [address as `0x${string}`],
+      })
+        .then((data) => {
+          if (data.toString() !== "0") {
+            balances.push(reserve);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+
+    return balances;
+  }, [poolReserves, address]);
 
   return (
     <div>
@@ -173,6 +199,7 @@ const Dashboard = () => {
             parseFloat(userSummary?.totalBorrowsUSD).toFixed(2)
           }
         />
+        <AssetsToSupply supplies={possibleSupplies} />
       </div>
     </div>
   );
@@ -266,7 +293,7 @@ const SupplyItem = ({ asset }: SupplyItemProps) => {
       {isSupplyModalOpen && (
         <SupplyModal
           closeModal={() => setIsSupplyModalOpen(false)}
-          asset={asset}
+          asset={asset.reserve}
         />
       )}
     </>
@@ -327,6 +354,61 @@ const BorrowItem = ({ asset }: BorrowItemProps) => {
       {isBorrowModalOpen && (
         <BorrowModal
           closeModal={() => setIsBorrowModalOpen(false)}
+          asset={asset}
+        />
+      )}
+    </>
+  );
+};
+
+type AssetsToSupplyProps = {
+  supplies:
+    | (FormatReserveUSDResponse &
+        ReserveDataHumanized &
+        Partial<CalculateReserveIncentivesResponse>)[]
+    | undefined;
+};
+
+const AssetsToSupply = ({ supplies }: AssetsToSupplyProps) => {
+  return (
+    <div className="rounded-md bg-gradient-to-r from-fuchsia-500 via-red-600 to-orange-400 p-[2px]">
+      <div className="flex flex-col items-start rounded-md bg-zinc-700 p-2">
+        <h3 className="mb-8">Assets to Supply</h3>
+        <ul className="flex flex-col gap-y-4">
+          {supplies?.map((asset) => (
+            <li key={asset.underlyingAsset}>
+              <AssetSupplyItem asset={asset} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+type AssetSupplyItemProps = {
+  asset: FormatReserveUSDResponse &
+    ReserveDataHumanized &
+    Partial<CalculateReserveIncentivesResponse>;
+};
+
+const AssetSupplyItem = ({ asset }: AssetSupplyItemProps) => {
+  const [isSupplyModalOpen, setIsSupplyModalOpen] = useState(false);
+
+  return (
+    <>
+      <div>
+        <div className="flex flex-row gap-x-4">
+          <p>reserve: {asset.name}</p>
+          <p>supply apy: {asset.supplyAPY}</p>
+        </div>
+        <div>
+          <button onClick={() => setIsSupplyModalOpen(true)}>Supply</button>
+        </div>
+      </div>
+      {isSupplyModalOpen && (
+        <SupplyModal
+          closeModal={() => setIsSupplyModalOpen(false)}
           asset={asset}
         />
       )}

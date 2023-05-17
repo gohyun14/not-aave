@@ -1,27 +1,17 @@
-import { useState, type ChangeEvent } from "react";
-import { poolAbi } from "../../../contract-info/abis";
-import { BigNumber, utils } from "ethers";
-import {
-  type FormatReserveUSDResponse,
-  type ComputedUserReserve,
-} from "@aave/math-utils";
-import {
-  usePrepareContractWrite,
-  useAccount,
-  useContractWrite,
-  useContractRead,
-  erc20ABI,
-} from "wagmi";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AnimatePresence, motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import {
-  ArrowRightIcon,
-  ArrowTopRightOnSquareIcon,
-} from "@heroicons/react/20/solid";
-import useReadBalance from "@/hooks/useReadBalance";
 import useApproval from "@/hooks/useApproval";
+import useReadBalance from "@/hooks/useReadBalance";
+import { type ReserveDataHumanized } from "@aave/contract-helpers";
+import { type FormatReserveUSDResponse } from "@aave/math-utils";
+import { type CalculateReserveIncentivesResponse } from "@aave/math-utils/dist/esm/formatters/incentive/calculate-reserve-incentives";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { utils } from "ethers";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { z } from "zod";
+import { poolAbi } from "../../../contract-info/abis";
 
 import Modal from "./Modal";
 
@@ -39,7 +29,11 @@ export type FormSchemaType = {
 
 type SupplyModalProps = {
   closeModal: () => void;
-  asset: ComputedUserReserve<FormatReserveUSDResponse>;
+  asset:
+    | (FormatReserveUSDResponse &
+        ReserveDataHumanized &
+        Partial<CalculateReserveIncentivesResponse>)
+    | FormatReserveUSDResponse;
 };
 
 const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
@@ -70,7 +64,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
   const { data: userBalanceData, isLoading: isUserBalanceLoading } =
     useReadBalance(
       asset.underlyingAsset as `0x${string}`,
-      asset.reserve.decimals,
+      asset.decimals,
       address as `0x${string}`
     );
 
@@ -79,7 +73,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
     useApproval(
       asset.underlyingAsset as `0x${string}`,
       address as `0x${string}`,
-      asset.reserve.decimals,
+      asset.decimals,
       amount
     );
 
@@ -90,7 +84,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
     functionName: "supply",
     args: [
       asset.underlyingAsset as `0x${string}`,
-      utils.parseUnits(amount.toString(), asset.reserve.decimals),
+      utils.parseUnits(amount.toString(), asset.decimals),
       address as `0x${string}`,
       0,
     ],
@@ -132,7 +126,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
         method="POST"
         className="text-zinc-900"
       >
-        <h1>Supply {asset.reserve.name}</h1>
+        <h1>Supply {asset.name}</h1>
         <div className="flex flex-col">
           <label
             htmlFor="last-name"

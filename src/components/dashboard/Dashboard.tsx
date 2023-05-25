@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useAccount, useProvider } from "wagmi";
 
+import AssetsToBorrow from "./AssetsToBorrow";
 import AssetsToSupply from "./AssetsToSupply";
 import YourBorrows from "./YourBorrows";
 import YourSupplies from "./YourSupplies";
@@ -171,6 +172,7 @@ const Dashboard = () => {
           }
         />
         <AssetsToSupply poolReserves={poolReserves} address={address} />
+        <AssetsToBorrow poolReserves={poolReserves} address={address} />
       </div>
     </div>
   );

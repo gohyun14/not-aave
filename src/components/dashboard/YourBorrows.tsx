@@ -63,7 +63,7 @@ const BorrowItem = ({ asset }: BorrowItemProps) => {
       {isBorrowModalOpen && (
         <BorrowModal
           closeModal={() => setIsBorrowModalOpen(false)}
-          asset={asset}
+          asset={asset.reserve}
         />
       )}
     </>

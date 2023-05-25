@@ -1,10 +1,9 @@
 import { useState, type ChangeEvent } from "react";
 import { poolAbi } from "../../../contract-info/abis";
 import { BigNumber, utils } from "ethers";
-import {
-  type FormatReserveUSDResponse,
-  type ComputedUserReserve,
-} from "@aave/math-utils";
+import { type ReserveDataHumanized } from "@aave/contract-helpers";
+import { type FormatReserveUSDResponse } from "@aave/math-utils";
+import { type CalculateReserveIncentivesResponse } from "@aave/math-utils/dist/esm/formatters/incentive/calculate-reserve-incentives";
 import {
   usePrepareContractWrite,
   useAccount,
@@ -36,7 +35,11 @@ export type FormSchemaType = {
 
 type BorrowModalProps = {
   closeModal: () => void;
-  asset: ComputedUserReserve<FormatReserveUSDResponse>;
+  asset:
+    | (FormatReserveUSDResponse &
+        ReserveDataHumanized &
+        Partial<CalculateReserveIncentivesResponse>)
+    | FormatReserveUSDResponse;
 };
 
 const BorrowModal = ({ closeModal, asset }: BorrowModalProps) => {
@@ -69,7 +72,7 @@ const BorrowModal = ({ closeModal, asset }: BorrowModalProps) => {
     functionName: "borrow",
     args: [
       asset.underlyingAsset as `0x${string}`,
-      utils.parseUnits(amount.toString(), asset.reserve.decimals),
+      utils.parseUnits(amount.toString(), asset.decimals),
       BigNumber.from(2),
       0,
       address as `0x${string}`,
@@ -111,7 +114,7 @@ const BorrowModal = ({ closeModal, asset }: BorrowModalProps) => {
         method="POST"
         className="text-zinc-900"
       >
-        <h1>Withdraw {asset.reserve.name}</h1>
+        <h1>Borrow {asset.name}</h1>
         <div className="flex flex-col">
           <label
             htmlFor="last-name"

@@ -172,7 +172,7 @@ const Dashboard = () => {
           }
         />
         <AssetsToSupply poolReserves={poolReserves} address={address} />
-        <AssetsToBorrow poolReserves={poolReserves} address={address} />
+        <AssetsToBorrow poolReserves={poolReserves} />
       </div>
     </div>
   );

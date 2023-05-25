@@ -13,14 +13,13 @@ type AssetsToBorrowProps = {
         ReserveDataHumanized &
         Partial<CalculateReserveIncentivesResponse>)[]
     | undefined;
-  address: `0x${string}` | undefined;
 };
 
-const AssetsToBorrow = ({ poolReserves, address }: AssetsToBorrowProps) => {
+const AssetsToBorrow = ({ poolReserves }: AssetsToBorrowProps) => {
   return (
     <div className="rounded-md bg-gradient-to-r from-fuchsia-500 via-red-600 to-orange-400 p-[2px]">
       <div className="flex flex-col items-start rounded-md bg-zinc-700 p-2">
-        <h3 className="mb-8">Assets to Supply</h3>
+        <h3 className="mb-8">Assets to Borrow</h3>
         <ul className="flex flex-col gap-y-4">
           {poolReserves
             ?.filter((reserve) => reserve.variableBorrowRate !== "0")

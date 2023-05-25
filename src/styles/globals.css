@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-zinc-800;
-    @apply text-white;
+    @apply bg-zinc-50;
+    @apply text-zinc-900;
   }
 }

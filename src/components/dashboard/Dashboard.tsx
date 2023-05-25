@@ -193,7 +193,7 @@ const DashboardHeader = ({
 }: DashboardHeaderProps) => {
   return (
     <div className="rounded-md bg-gradient-to-r from-fuchsia-500 via-red-600 to-orange-400 p-[2px]">
-      <div className="flex flex-col items-start rounded-md bg-zinc-700 p-2">
+      <div className="flex flex-col items-start rounded-md bg-white p-2">
         <h3 className="bg-gradient-to-r from-fuchsia-500 via-red-600 to-orange-400 bg-clip-text text-3xl font-medium text-transparent">
           {address}
         </h3>

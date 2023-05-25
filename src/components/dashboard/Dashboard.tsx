@@ -35,6 +35,11 @@ const Dashboard = () => {
         Partial<CalculateReserveIncentivesResponse>)[]
     >();
   const [userSummary, setUserSummary] = useState<FormatUserSummaryResponse>();
+  const [possibleSupplies, setPossibleSupplies] = useState<
+    (FormatReserveUSDResponse &
+      ReserveDataHumanized &
+      Partial<CalculateReserveIncentivesResponse>)[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -130,7 +135,7 @@ const Dashboard = () => {
       });
   }, [address, provider]);
 
-  // console.log("poolReserves", poolReserves);
+  console.log("poolReserves", poolReserves);
   // console.log("userSummary", userSummary);
 
   // const netAPY = useMemo(() => {}, []);
@@ -145,29 +150,41 @@ const Dashboard = () => {
   );
   // console.log("userReservesFiltered", userBorrows);
 
-  const possibleSupplies = useMemo(() => {
-    const balances: (FormatReserveUSDResponse &
-      ReserveDataHumanized &
-      Partial<CalculateReserveIncentivesResponse>)[] = [];
+  // get possible user supples (user has a balance of the reserve's underlying asset in their wallet)
+  useEffect(() => {
+    const getBalances = () => {
+      return poolReserves
+        ? poolReserves?.map(async (reserve) => {
+            const balance = await readContract({
+              address: reserve.underlyingAsset as `0x${string}`,
+              abi: erc20ABI,
+              functionName: "balanceOf",
+              args: [address as `0x${string}`],
+            });
 
-    poolReserves?.forEach((reserve) => {
-      readContract({
-        address: reserve.underlyingAsset as `0x${string}`,
-        abi: erc20ABI,
-        functionName: "balanceOf",
-        args: [address as `0x${string}`],
-      })
-        .then((data) => {
-          if (data.toString() !== "0") {
-            balances.push(reserve);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    });
+            return {
+              asset: reserve.underlyingAsset,
+              balance: balance.toString(),
+            };
+          })
+        : [];
+    };
 
-    return balances;
+    const setBalances = async () => {
+      const balances = await Promise.all(getBalances());
+      const filteredBalances = poolReserves?.filter((reserve) => {
+        const balance = balances.find(
+          (balance) => balance.asset === reserve.underlyingAsset
+        );
+
+        return balance?.balance !== "0";
+      });
+      setPossibleSupplies(filteredBalances ?? []);
+    };
+
+    if (poolReserves && poolReserves.length > 0 && !!address) {
+      void setBalances();
+    }
   }, [poolReserves, address]);
 
   return (
@@ -415,5 +432,7 @@ const AssetSupplyItem = ({ asset }: AssetSupplyItemProps) => {
     </>
   );
 };
+
+//stableBorrowRateEnabled
 
 export default Dashboard;

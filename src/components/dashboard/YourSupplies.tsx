@@ -17,7 +17,7 @@ const YourSupplies = ({ supplies, balance }: YourSuppliesProps) => {
   return (
     <div className="flex flex-col items-start rounded-md p-2">
       <h3>Your Supplies</h3>
-      <p className="mb-8">Total supply balance: {balance}</p>
+      <p className="mb-8">Total supply balance: ${balance}</p>
       <ul className="flex flex-row flex-wrap gap-x-4 gap-y-4">
         {supplies?.map((asset) => (
           <li key={asset.underlyingAsset}>
@@ -40,9 +40,9 @@ const SupplyItem = ({ asset }: SupplyItemProps) => {
   const [isSupplyModalOpen, setIsSupplyModalOpen] = useState(false);
 
   const assetAPY = useMemo(() => {
-    const supplyAPY = Number(asset.reserve.supplyAPY);
-    if (supplyAPY == 0) return "0 %";
-    if (supplyAPY < 0.01) return "< 0.01 %";
+    const supplyAPY = Number(asset.reserve.supplyAPY) * 100;
+    if (supplyAPY == 0) return "0";
+    if (supplyAPY < 0.01) return "< 0.01";
     return supplyAPY.toFixed(2);
   }, [asset.reserve.supplyAPY]);
 
@@ -61,7 +61,10 @@ const SupplyItem = ({ asset }: SupplyItemProps) => {
           </div>
 
           <p className="-mt-1 text-xs text-zinc-500">Balance</p>
-          <p className="mt-2 text-lg text-zinc-800">{assetAPY}</p>
+          <p className="mt-2 text-lg text-zinc-800">
+            {assetAPY}
+            <span className="ml-1 text-sm">%</span>
+          </p>
           <p className="-mt-1 text-xs text-zinc-500">APY</p>
         </div>
         <div className="mt-8 flex flex-row justify-end gap-x-2">

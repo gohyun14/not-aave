@@ -1,11 +1,10 @@
 import { type ReserveDataHumanized } from "@aave/contract-helpers";
 import { type FormatReserveUSDResponse } from "@aave/math-utils";
 import { type CalculateReserveIncentivesResponse } from "@aave/math-utils/dist/esm/formatters/incentive/calculate-reserve-incentives";
-import { readContract } from "@wagmi/core";
-import { useEffect, useState } from "react";
-import { erc20ABI } from "wagmi";
+import { useState, useMemo } from "react";
 
 import BorrowModal from "../UI/Modal/BorrowModal";
+import Button from "../UI/Button";
 
 type AssetsToBorrowProps = {
   poolReserves:
@@ -17,19 +16,17 @@ type AssetsToBorrowProps = {
 
 const AssetsToBorrow = ({ poolReserves }: AssetsToBorrowProps) => {
   return (
-    <div className="rounded-md bg-gradient-to-r from-fuchsia-500 via-red-600 to-orange-400 p-[2px]">
-      <div className="flex flex-col items-start rounded-md bg-zinc-700 p-2">
-        <h3 className="mb-8">Assets to Borrow</h3>
-        <ul className="flex flex-col gap-y-4">
-          {poolReserves
-            ?.filter((reserve) => reserve.variableBorrowRate !== "0")
-            .map((asset) => (
-              <li key={asset.underlyingAsset}>
-                <AssetBorrowItem asset={asset} />
-              </li>
-            ))}
-        </ul>
-      </div>
+    <div className="flex flex-col items-start rounded-md p-2">
+      <h3 className="mb-8">Assets to Borrow</h3>
+      <ul className="flex flex-row flex-wrap gap-x-4 gap-y-4">
+        {poolReserves
+          ?.filter((reserve) => reserve.variableBorrowRate !== "0")
+          .map((asset) => (
+            <li key={asset.underlyingAsset}>
+              <AssetBorrowItem asset={asset} />
+            </li>
+          ))}
+      </ul>
     </div>
   );
 };
@@ -43,22 +40,39 @@ type AssetBorrowItemProps = {
 };
 
 const AssetBorrowItem = ({ asset }: AssetBorrowItemProps) => {
-  const [isSupplyModalOpen, setIsSupplyModalOpen] = useState(false);
+  const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
+
+  const assetAPY = useMemo(() => {
+    const borrowAPY = Number(asset.variableBorrowAPY) * 100;
+    if (borrowAPY == 0) return "0";
+    if (borrowAPY < 0.01) return "< 0.01";
+    return borrowAPY.toFixed(2);
+  }, [asset.variableBorrowAPY]);
 
   return (
     <>
-      <div>
-        <div className="flex flex-row gap-x-4">
-          <p>reserve: {asset.name}</p>
-          <p>supply apy: {asset.supplyAPY}</p>
+      <div className="w-52 rounded-md border border-zinc-300 bg-white p-5 shadow-md transition-colors duration-300 hover:border-zinc-400 hover:shadow-lg">
+        <div className="">
+          <p className="text-2xl font-medium">{asset.name}</p>
+          <p className=" mt-2 text-lg text-zinc-800">
+            {(Number(asset.borrowUsageRatio) * 100).toFixed(2)}
+            <span className="ml-1 text-sm">%</span>
+          </p>
+
+          <p className="-mt-1 text-xs text-zinc-500">Usage</p>
+          <p className="mt-2 text-lg text-zinc-800">
+            {assetAPY}
+            <span className="ml-1 text-sm">%</span>
+          </p>
+          <p className="-mt-1 text-xs text-zinc-500">APY</p>
         </div>
-        <div>
-          <button onClick={() => setIsSupplyModalOpen(true)}>Borrow</button>
+        <div className="mt-8 flex flex-row justify-end gap-x-2">
+          <Button onClick={() => setIsBorrowModalOpen(true)}>Borrow</Button>
         </div>
       </div>
-      {isSupplyModalOpen && (
+      {isBorrowModalOpen && (
         <BorrowModal
-          closeModal={() => setIsSupplyModalOpen(false)}
+          closeModal={() => setIsBorrowModalOpen(false)}
           asset={asset}
         />
       )}

@@ -9,11 +9,14 @@ const Home: NextPage = () => {
     <>
       <Head>
         <title>Not Aave</title>
-        <meta name="description" content="A frontend that directly plugs into the Aave protocol contracts." />
+        <meta
+          name="description"
+          content="A frontend that directly plugs into the Aave protocol contracts."
+        />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="min-h-screen">
-        <div className="absolute right-5 top-5">
+        <div className="absolute right-5 top-5 z-[2]">
           <ConnectWalletButton />
         </div>
         <Dashboard />

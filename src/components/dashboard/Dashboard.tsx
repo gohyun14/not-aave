@@ -39,18 +39,18 @@ const Dashboard = () => {
       if (provider && address) {
         const poolDataProviderContract = new UiPoolDataProvider({
           // eslint-disable-next-line
-          uiPoolDataProviderAddress: markets.AaveV3Goerli
+          uiPoolDataProviderAddress: markets.AaveV3Sepolia
             .UI_POOL_DATA_PROVIDER as string,
           provider,
-          chainId: ChainId.goerli,
+          chainId: ChainId.sepolia,
         });
 
         const incentiveDataProviderContract = new UiIncentiveDataProvider({
           // eslint-disable-next-line
-          uiIncentiveDataProviderAddress: markets.AaveV3Goerli
+          uiIncentiveDataProviderAddress: markets.AaveV3Sepolia
             .UI_INCENTIVE_DATA_PROVIDER as string,
           provider,
-          chainId: ChainId.mainnet,
+          chainId: ChainId.sepolia,
         });
 
         // Object containing array of pool reserves and market base currency data
@@ -60,7 +60,7 @@ const Dashboard = () => {
           // eslint-disable-next-line
           lendingPoolAddressProvider:
             // eslint-disable-next-line
-            markets.AaveV3Goerli.POOL_ADDRESSES_PROVIDER,
+            markets.AaveV3Sepolia.POOL_ADDRESSES_PROVIDER,
         });
 
         // Array of incentive tokens with price feed and emission APR
@@ -71,7 +71,7 @@ const Dashboard = () => {
               // eslint-disable-next-line
               lendingPoolAddressProvider:
                 // eslint-disable-next-line
-                markets.AaveV3Goerli.POOL_ADDRESSES_PROVIDER,
+                markets.AaveV3Sepolia.POOL_ADDRESSES_PROVIDER,
             }
           );
 
@@ -99,7 +99,7 @@ const Dashboard = () => {
             // eslint-disable-next-line
             lendingPoolAddressProvider:
               // eslint-disable-next-line
-              markets.AaveV3Goerli.POOL_ADDRESSES_PROVIDER,
+              markets.AaveV3Sepolia.POOL_ADDRESSES_PROVIDER,
             user: address,
           });
 

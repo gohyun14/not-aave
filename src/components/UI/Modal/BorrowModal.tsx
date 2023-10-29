@@ -211,7 +211,7 @@ const BorrowModal = ({ closeModal, asset }: BorrowModalProps) => {
           </motion.div>
         ) : (
           <motion.a
-            href={`https://goerli.etherscan.io/tx/${
+            href={`https://sepolia.etherscan.io/tx/${
               sendTransactionData?.hash as string
             }`}
             target="_blank"

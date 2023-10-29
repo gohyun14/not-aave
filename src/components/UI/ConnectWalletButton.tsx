@@ -10,7 +10,7 @@ const ConnectWalletButton = () => {
       {isConnected ? (
         <div>Connected to {activeConnector?.name}</div>
       ) : (
-        <>
+        <div className="flex flex-row gap-x-[8px]">
           {connectors.map((connector) => (
             <button
               disabled={!connector.ready}
@@ -19,6 +19,7 @@ const ConnectWalletButton = () => {
                 console.log("hi");
                 connect({ connector });
               }}
+              className="hover:cursor-pointer disabled:hover:cursor-not-allowed"
             >
               {connector.name}
               {isLoading &&
@@ -26,7 +27,7 @@ const ConnectWalletButton = () => {
                 " (connecting)"}
             </button>
           ))}
-        </>
+        </div>
       )}
     </>
   );

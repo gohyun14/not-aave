@@ -29,7 +29,7 @@ const useApproval = (
       process.env.NEXT_PUBLIC_GOERLI_AAVE_POOL_CONTRACT as `0x${string}`,
       utils.parseUnits(amount.toString(), decimals),
     ],
-    enabled: !!userAddress && !!userApprovalData && amount > 0,
+    enabled: !!userAddress && userApprovalData !== undefined && amount > 0,
   });
 
   const {

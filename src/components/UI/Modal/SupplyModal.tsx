@@ -76,6 +76,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
       asset.decimals,
       amount
     );
+  // console.log(sendAllowanceTransaction)
 
   // supply transaction logic
   const { config: supplyConfig } = usePrepareContractWrite({
@@ -266,7 +267,7 @@ const SupplyModal = ({ closeModal, asset }: SupplyModalProps) => {
           </motion.div>
         ) : (
           <motion.a
-            href={`https://goerli.etherscan.io/tx/${
+            href={`https://sepolia.etherscan.io/tx/${
               sendTransactionData?.hash as string
             }`}
             target="_blank"
